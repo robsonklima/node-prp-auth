@@ -3,7 +3,6 @@ console.log('env *****', env);
 
 var mysql = require('mysql');
 var pool  = null;
-var dbConfig  = null;
 
 switch(env) {
     case 'development':

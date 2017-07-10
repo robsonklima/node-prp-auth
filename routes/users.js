@@ -18,7 +18,8 @@ function createToken(user) {
 
 function login(userEmail, userPassword, done) {
   db.get().query(`SELECT user_id userId, user_name userName, user_email userEmail 
-                   FROM users WHERE user_email = ? and user_password = ? LIMIT 1`, [userEmail, userPassword], function(err, rows, fields) {
+                   FROM users WHERE user_email = ? and user_password = ? LIMIT 1`, 
+                   [userEmail, userPassword], function(err, rows, fields) {
     if (err) throw err;
     done(rows[0]);
   });

@@ -14,12 +14,15 @@ var jwtCheck = ejwt({
 app.use('/projects', jwtCheck);
 
 app.get('/projects', function(req, res) {
-  db.get().query(`SELECT 
-                   project_id projectId
-                   , project_name projectName
-                   , project_scope projectScope
-                   , project_added_date projectAddedDate
-                   FROM projects`, function(err, rows, fields) {
+  db.get().query(`SELECT 	    p.project_id projectId
+                              , p.project_name projectName
+                              , p.project_scope projectScope
+                              , p.project_added_date projectAddedDate
+                              , count(a.activity_id) projectAmountActivities
+                   FROM 		  projects p
+                   LEFT JOIN	activities a on p.project_id = a.project_id
+                   GROUP BY 	p.project_id
+                   ORDER BY 	p.project_name`, function(err, rows, fields) {
     if (err) 
         return res.status(400).send({"error": true, "details": err});            
     
