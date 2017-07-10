@@ -7,7 +7,15 @@ var bodyParser = require('body-parser');
 var cors = require('cors'); //add cors
 
 var users = require('./routes/users');
-var quotes = require('./routes/quotes'); //quotes
+var projects = require('./routes/projects');
+var activities = require('./routes/activities');
+var riskTypes = require('./routes/risk-types');
+var riskCategories = require('./routes/risk-categories');
+var riskIdentifications = require('./routes/risk-identifications');
+var riskProblems = require('./routes/risk-problems');
+var risks = require('./routes/risks');
+var riskReviews = require('./routes/risk-reviews');
+var riskReviewReferences = require('./routes/risk-review-references');
 
 var app = express();
 
@@ -22,7 +30,15 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(users);
-app.use(quotes);
+app.use(projects);
+app.use(activities);
+app.use(riskTypes);
+app.use(riskCategories);
+app.use(riskIdentifications);
+app.use(risks);
+app.use(riskProblems);
+app.use(riskReviews);
+app.use(riskReviewReferences);
 
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

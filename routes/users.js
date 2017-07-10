@@ -24,11 +24,19 @@ function login(userEmail, userPassword, done) {
   });
 }
 
-function findUsers(done) {
+function getAll(done) {
   db.get().query(`SELECT user_id userId , user_name userName, user_email userEmail, user_password userPassword
                    FROM users`, function(err, rows, fields) {
     if (err) throw err;
     done(rows);
+  });
+}
+
+function getById(userId, done) {
+  db.get().query(`SELECT user_id userId, user_name userName, user_email userEmail, user_password userPassword
+                   FROM users WHERE user_id = ?`, [userId], function(err, rows, fields) {
+    if (err) throw err;
+    done(rows[0]);
   });
 }
 
@@ -55,9 +63,9 @@ app.post('/users/new', function(req, res) {
     res.status(201).send({
       user: {
         userName: user.user_name,
-        userEmail: user.user_email
-      },
-      id_token: createToken(newUser)
+        userEmail: user.user_email,
+        userToken: createToken(newUser)
+      }
     });
   });
 });
@@ -69,18 +77,25 @@ app.post('/users/login', function(req, res) {
 
     res.status(201).send({
       user: {
+        userId: user.userId,
         userName: user.userName,
-        userEmail: user.userEmail
-      },
-      id_token: createToken(user)
+        userEmail: user.userEmail,
+        userToken: createToken(user)
+      }
     });
+  });
+});
+
+app.get('/users/:userId', function(req, res) {
+  getById(req.params.userId, function(result) {
+      res.status(200).send(result);
   });
 });
 
 app.use('/private', jwtCheck);
 
 app.get('/private/users', function(req, res) {
-  findUsers(function(result) {
+  getAll(function(result) {
       res.status(200).send(result);
   });
 });

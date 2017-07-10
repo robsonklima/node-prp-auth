@@ -7,7 +7,6 @@ db.connect();
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
-console.log('Listening on port ' + port);
 
 var server = http.createServer(app);
 
@@ -56,4 +55,6 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  
+  console.log('Listening on port ' + port);
 }
