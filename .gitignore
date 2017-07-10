@@ -2,4 +2,5 @@ node_modules/
 typings/
 .vscode/
 *.log
-*.log.* 
+*.log.*
+db.js
