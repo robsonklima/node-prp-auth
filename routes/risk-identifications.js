@@ -11,6 +11,8 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
+app.use('/risk-identifications', jwtCheck);
+
 app.get('/risk-identifications/projects/:userId/:riskId', function(req, res) {
   db.get().query(`SELECT 			p.project_id projectId
                               , p.project_name projectName

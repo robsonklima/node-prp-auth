@@ -11,6 +11,8 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
+app.use('/risk-review-references', jwtCheck);
+
 app.get('/risk-review-references', function(req, res) {
   db.get().query(`SELECT        risk_review_references_id riskReviewReferenceId
                                 , risk_review_references_title riskReviewReferenceTitle

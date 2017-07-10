@@ -32,43 +32,35 @@ function getAll(done) {
   });
 }
 
-function getById(userId, done) {
-  db.get().query(`SELECT user_id userId, user_name userName, user_email userEmail, user_password userPassword
-                   FROM users WHERE user_id = ?`, [userId], function(err, rows, fields) {
-    if (err) throw err;
-    done(rows[0]);
-  });
-}
-
-app.post('/users/new', function(req, res) {  
-  if (!req.body.userName || !req.body.userPassword) {
-    return res.status(400).send({"error": true, "details": 'Email and password required'});
-  }
+// app.post('/users/new', function(req, res) {  
+//   if (!req.body.userName || !req.body.userPassword) {
+//     return res.status(400).send({"error": true, "details": 'Email and password required'});
+//   }
   
-  user = {
-    user_name: req.body.userName,
-    user_email: req.body.userEmail,
-    user_password: md5(req.body.userPassword)
-  };
+//   user = {
+//     user_name: req.body.userName,
+//     user_email: req.body.userEmail,
+//     user_password: md5(req.body.userPassword)
+//   };
   
-  db.get().query('INSERT INTO users SET ?', [user], function(err, result){
-    if (err) 
-        return res.status(400).send({"error": true, "details": err});
+//   db.get().query('INSERT INTO users SET ?', [user], function(err, result){
+//     if (err) 
+//         return res.status(400).send({"error": true, "details": err});
 
-    newUser = {
-      user_name: user.user_name,
-      user_email: user.user_email,
-      user_password: user.user_password
-    };
-    res.status(201).send({
-      user: {
-        userName: user.user_name,
-        userEmail: user.user_email,
-        userToken: createToken(newUser)
-      }
-    });
-  });
-});
+//     newUser = {
+//       user_name: user.user_name,
+//       user_email: user.user_email,
+//       user_password: user.user_password
+//     };
+//     res.status(201).send({
+//       user: {
+//         userName: user.user_name,
+//         userEmail: user.user_email,
+//         userToken: createToken(newUser)
+//       }
+//     });
+//   });
+// });
 
 app.post('/users/login', function(req, res) {
   login(req.body.userEmail, md5(req.body.userPassword), function(user){
@@ -83,12 +75,6 @@ app.post('/users/login', function(req, res) {
         userToken: createToken(user)
       }
     });
-  });
-});
-
-app.get('/users/:userId', function(req, res) {
-  getById(req.params.userId, function(result) {
-      res.status(200).send(result);
   });
 });
 

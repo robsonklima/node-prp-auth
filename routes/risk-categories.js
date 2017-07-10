@@ -11,6 +11,8 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
+app.use('/risk-categories', jwtCheck);
+
 app.get('/risk-categories', function(req, res) {
   db.get().query(`SELECT risk_category_id riskCategoryId, risk_category_name riskCategoryName
                    FROM risk_categories ORDER BY risk_category_name ASC`, function(err, rows, fields) {
