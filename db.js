@@ -6,7 +6,7 @@ var env = process.env.NODE_ENV || 'development';
 console.log('env *****', env);
 
 switch(env) {
-    case 'development':
+    case 'developments':
         process.env.PORT = 3000;
         dbConfig = {
           connectionLimit : 100,
@@ -28,11 +28,18 @@ switch(env) {
           password : '8de4e484',
           database : 'heroku_45af283e6046208',
           debug    :  false
-        };
+        }
 }
 
 exports.connect = function() {
-  pool = mysql.createPool(dbConfig);
+  pool = mysql.createPool({
+    connectionLimit : 100,
+    host     : 'us-cdbr-iron-east-03.cleardb.net',
+    user     : 'b544072879e803',
+    password : '8de4e484',
+    database : 'heroku_45af283e6046208',
+    debug    :  false
+  });
 }
 
 exports.get = function() {
