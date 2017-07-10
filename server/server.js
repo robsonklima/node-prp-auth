@@ -2,12 +2,12 @@ var app = require('../app');
 var debug = require('debug')('mysql-jwt-auth:server');
 var http = require('http');
 
-var db = require('../db');
-db.connect();
-
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 console.log('Listening on port ' + port);
+
+var db = require('../db');
+db.connect(port);
 
 var server = http.createServer(app);
 

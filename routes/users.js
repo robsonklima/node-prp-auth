@@ -3,7 +3,7 @@ var express = require('express'),
     config  = require('../config'),
     jwt     = require('jsonwebtoken'),
     ejwt    = require('express-jwt'),
-    md5    = require('md5'),
+    md5     = require('md5'),
     db      = require('../db');
 
 var app = module.exports = express.Router();
@@ -13,7 +13,7 @@ var jwtCheck = ejwt({
 });
 
 function createToken(user) {
-  return jwt.sign(_.omit(user, 'password'), config.secretKey, { expiresIn: 60*60 });
+  return jwt.sign(_.omit(user), config.secretKey, { expiresIn: 60 * 60 });
 }
 
 function login(userEmail, userPassword, done) {
