@@ -4,10 +4,9 @@ var dbConfig = null;
 
 var env = process.env.NODE_ENV || 'development';
 console.log('env *****', env);
-console.log('List on port: ' + process.env.PORT);
 
 switch(env) {
-    case 'developments':
+    case 'development':
         process.env.PORT = 3000;
         dbConfig = {
           connectionLimit : 100,
@@ -18,7 +17,7 @@ switch(env) {
         }
         break;
     case "test":
-        // no test yet
+        // to do
         break;
     default:
         // stark-cliffs-54398
@@ -29,18 +28,11 @@ switch(env) {
           password : '8de4e484',
           database : 'heroku_45af283e6046208',
           debug    :  false
-        }
+        };
 }
 
 exports.connect = function() {
-  pool = mysql.createPool({
-    connectionLimit : 100,
-    host     : 'us-cdbr-iron-east-03.cleardb.net',
-    user     : 'b544072879e803',
-    password : '8de4e484',
-    database : 'heroku_45af283e6046208',
-    debug    :  false
-  });
+  pool = mysql.createPool(dbConfig);
 }
 
 exports.get = function() {
