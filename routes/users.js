@@ -17,51 +17,15 @@ function createToken(user) {
 }
 
 function login(userEmail, userPassword, done) {
-  db.get().query(`SELECT user_id userId, user_name userName, user_email userEmail 
+  db.get().query(`SELECT  user_id userId
+                          , user_name userName
+                          , user_email userEmail 
                    FROM users WHERE user_email = ? and user_password = ? LIMIT 1`, 
                    [userEmail, userPassword], function(err, rows, fields) {
     if (err) throw err;
     done(rows[0]);
   });
 }
-
-function getAll(done) {
-  db.get().query(`SELECT user_id userId , user_name userName, user_email userEmail, user_password userPassword
-                   FROM users`, function(err, rows, fields) {
-    if (err) throw err;
-    done(rows);
-  });
-}
-
-// app.post('/users/new', function(req, res) {  
-//   if (!req.body.userName || !req.body.userPassword) {
-//     return res.status(400).send({"error": true, "details": 'Email and password required'});
-//   }
-  
-//   user = {
-//     user_name: req.body.userName,
-//     user_email: req.body.userEmail,
-//     user_password: md5(req.body.userPassword)
-//   };
-  
-//   db.get().query('INSERT INTO users SET ?', [user], function(err, result){
-//     if (err) 
-//         return res.status(400).send({"error": true, "details": err});
-
-//     newUser = {
-//       user_name: user.user_name,
-//       user_email: user.user_email,
-//       user_password: user.user_password
-//     };
-//     res.status(201).send({
-//       user: {
-//         userName: user.user_name,
-//         userEmail: user.user_email,
-//         userToken: createToken(newUser)
-//       }
-//     });
-//   });
-// });
 
 app.post('/users/login', function(req, res) {
   login(req.body.userEmail, md5(req.body.userPassword), function(user){
@@ -79,10 +43,40 @@ app.post('/users/login', function(req, res) {
   });
 });
 
-app.use('/private', jwtCheck);
+app.post('/users', function(req, res) {  
+  if (!req.body.userName || !req.body.userPassword) {
+    return res.status(400).send({"error": true, "details": 'Email and password required'});
+  }
 
-app.get('/private/users', function(req, res) {
-  getAll(function(result) {
-      res.status(200).send(result);
+  user = {
+    user_name: req.body.userName,
+    user_email: req.body.userEmail,
+    user_password: md5(req.body.userPassword)
+  };
+  
+  db.get().query('INSERT INTO users SET ?', [user], function(err, result){
+    if (err) 
+        return res.status(400).send({"error": true, "details": err});
+
+    res.status(201).send({
+      user: {
+        userName: user.user_name,
+        userEmail: user.user_email,
+        userToken: createToken(user)
+      }
+    });
+  });
+});
+
+app.get('/users', function(req, res) {
+  db.get().query(`SELECT  user_id userId 
+                          , user_name userName
+                          , user_email userEmail
+                          , user_password userPassword
+                   FROM users`, function(err, rows, fields) {
+     if (err)
+        return res.status(400).send();
+
+     res.status(200).send(rows);
   });
 });
