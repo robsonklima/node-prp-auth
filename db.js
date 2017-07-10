@@ -4,6 +4,7 @@ var dbConfig = null;
 
 var env = process.env.NODE_ENV || 'development';
 console.log('env *****', env);
+console.log('List on port: ' + process.env.PORT);
 
 switch(env) {
     case 'developments':
