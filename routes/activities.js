@@ -76,7 +76,7 @@ app.put('/activities/:activityId', function(req, res) {
     activity_details: req.body.activityDetails,
     activity_amount_hours: req.body.activityAmountHours,
     project_id: req.body.projectId,
-    user_id:  req.body.userId,
+    user_id: req.body.userId,
     activity_added_date: new Date()
   };
 
