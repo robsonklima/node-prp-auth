@@ -43,7 +43,8 @@ app.get('/activities/:activityId', function(req, res) {
                     , activity_added_date activityAddedDate
                     , project_id projectId
                     , user_id userId
-                   FROM activities WHERE activity_id = ?`, [req.params.activityId], function(err, rows, fields) {
+                   FROM activities WHERE activity_id = ?`, 
+                   [req.params.activityId], function(err, rows, fields) {
     if (err) 
         return res.status(400).send({"error": true, "details": err});            
     
@@ -79,7 +80,8 @@ app.put('/activities/:activityId', function(req, res) {
     activity_added_date: new Date()
   };
 
-  db.get().query('UPDATE activities SET ? WHERE activity_id = ?', [activity, req.params.activityId], function(err, result){ 
+  db.get().query('UPDATE activities SET ? WHERE activity_id = ?', 
+    [activity, req.params.activityId], function(err, result){ 
     if (err) 
         return res.status(400).send({"error": true, "details": err});
 
@@ -88,7 +90,8 @@ app.put('/activities/:activityId', function(req, res) {
 });
 
 app.delete('/activities/:activityId', function(req, res) {  
-  db.get().query('DELETE FROM activities WHERE activity_id = ?', [req.params.activityId], function(err, result){ 
+  db.get().query('DELETE FROM activities WHERE activity_id = ?', 
+    [req.params.activityId], function(err, result){ 
     if (err) 
         return res.status(400).send({"error": true, "details": err});
 
