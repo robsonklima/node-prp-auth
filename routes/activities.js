@@ -11,7 +11,7 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
-app.use('/activities', jwtCheck);
+app.use('/activities/private', jwtCheck);
 
 app.get('/activities', function(req, res) {
   db.get().query(`SELECT 	  
