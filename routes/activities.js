@@ -34,6 +34,28 @@ app.get('/activities', function(req, res) {
   });
 });
 
+app.get('/activities/project/:projectId', function(req, res) {
+  db.get().query(`SELECT 	  
+                   a.activity_id activityId
+                   , a.activity_title activityTitle
+                   , a.activity_details activityDetails
+                   , a.activity_amount_hours activityAmountHours
+                   , a.activity_added_date activityAddedDate
+                   , a.project_id projectId
+                   , a.user_id userId
+                   , p.project_name projectName
+                   , u.user_name userName
+                   FROM 	activities a, projects p, users u
+                   WHERE 	a.project_id = p.project_id and a.user_id = u.user_id
+                   AND    a.project_id = ?
+                   ORDER BY a.activity_title`, [req.params.projectId], function(err, rows, fields) {
+    if (err) 
+        return res.status(400).send({"error": true, "details": err});            
+    
+    res.status(200).send(rows);
+  });
+});
+
 app.get('/activities/:activityId', function(req, res) {
   db.get().query(`SELECT 
                     activity_id activityId

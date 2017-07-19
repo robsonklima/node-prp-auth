@@ -11,7 +11,7 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
-app.use('/risk-types', jwtCheck);
+app.use('/risk-types/private', jwtCheck);
 
 app.get('/risk-types', function(req, res) {
   db.get().query(`SELECT risk_type_id riskTypeId, risk_type_name riskTypeName
