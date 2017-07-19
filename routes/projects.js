@@ -11,7 +11,7 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
-app.use('/projects', jwtCheck);
+app.use('/projects/private', jwtCheck);
 
 app.get('/projects', function(req, res) {
   db.get().query(`SELECT 	    p.project_id projectId
