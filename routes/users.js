@@ -30,7 +30,7 @@ function login(userEmail, userPassword, done) {
 app.post('/users/login', function(req, res) {
   login(req.body.userEmail, md5(req.body.userPassword), function(user){
     if (!user)
-      return res.status(404).send();
+      return res.status(400).send({ error: "Email or password invalid" });
 
     res.status(201).send({
       user: {
@@ -45,7 +45,7 @@ app.post('/users/login', function(req, res) {
 
 app.post('/users', function(req, res) {  
   if (!req.body.userName || !req.body.userPassword) {
-    return res.status(400).send({"error": true, "details": 'Email and password required'});
+    return res.status(400).send({ error: "Email and password required" });
   }
 
   user = {
