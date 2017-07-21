@@ -24,7 +24,10 @@ app.get('/projects', function (req, res) {
                    GROUP BY 	p.project_id
                    ORDER BY 	p.project_name`, function (err, rows, fields) {
       if (err)
-        return res.status(400).send({ "error": true, "details": err });
+        return res.status(400).send({ 
+          error: "Unable to fetch projects", 
+          details: err 
+      });
 
       res.status(200).send(rows);
     });

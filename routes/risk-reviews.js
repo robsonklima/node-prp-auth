@@ -35,9 +35,12 @@ app.get('/risk-reviews/:userId', function(req, res) {
                   LEFT JOIN		  risk_reviews rr ON rr.risk_identification_id = ri.risk_identification_id
                   WHERE		      u.user_id = ?
                   ORDER BY 	  	r.risk_title, p.project_name`, [req.params.userId], function(err, rows, fields) {
-    if (err) 
-        return res.status(400).send({"error": true, "details": err});            
-    
+    if (err)
+      return res.status(400).send({ 
+        error: "Unable to fetch projects", 
+        details: err 
+    });
+
     res.status(200).send(rows);
   });
 });
