@@ -34,6 +34,54 @@ app.get('/risks', function (req, res) {
     });
 });
 
+app.get('/risks/project/:projectId', function (req, res) {
+  db.get().query(`SELECT    	r.risk_id riskId
+                              , r.risk_title riskTitle
+                              , r.risk_cause riskCause
+                              , r.risk_effect riskEffect
+                              , r.risk_added_date riskAddedDate
+                              , r.risk_category_id riskCategoryId
+                              , rc.risk_category_name riskCategoryName    
+                              , r.risk_type_id riskTypeId
+                              , rt.risk_type_name riskTypeName
+                              , (SELECT risk_identification_id FROM risk_identifications ri 
+                                  WHERE r.risk_id = ri.risk_id
+                                  AND ri.project_id = ?) as riskIdentificationId
+                   FROM 		  risks r
+                   INNER JOIN	risk_types rt ON r.risk_type_id = rt.risk_type_id
+                   INNER JOIN	risk_categories rc ON r.risk_category_id = rc.risk_category_id
+                   ORDER BY 	riskIdentificationId, r.risk_title;`, [req.params.projectId], function (err, rows, fields) {
+      if (err)
+        return res.status(400).send({ "error": true, "details": err });
+
+      res.status(200).send(rows);
+    });
+});
+
+app.get('/risks/activity/:activityId', function (req, res) {
+  db.get().query(`SELECT    	r.risk_id riskId
+                              , r.risk_title riskTitle
+                              , r.risk_cause riskCause
+                              , r.risk_effect riskEffect
+                              , r.risk_added_date riskAddedDate
+                              , r.risk_category_id riskCategoryId
+                              , rc.risk_category_name riskCategoryName    
+                              , r.risk_type_id riskTypeId
+                              , rt.risk_type_name riskTypeName
+                              , (SELECT risk_identification_id FROM risk_identifications ri 
+                                  WHERE r.risk_id = ri.risk_id
+                                  AND ri.activity_id = ?) as riskIdentificationId
+                   FROM 		  risks r
+                   INNER JOIN	risk_types rt ON r.risk_type_id = rt.risk_type_id
+                   INNER JOIN	risk_categories rc ON r.risk_category_id = rc.risk_category_id
+                   ORDER BY 	riskIdentificationId, r.risk_title;`, [req.params.activityId], function (err, rows, fields) {
+      if (err)
+        return res.status(400).send({ "error": true, "details": err });
+
+      res.status(200).send(rows);
+    });
+});
+
 app.get('/risks/:riskId', function (req, res) {
   db.get().query(`SELECT    risk_id riskId
                             , risk_title riskTitle

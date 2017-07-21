@@ -14,7 +14,8 @@ var jwtCheck = ejwt({
 app.use('/risk-reviews/private', jwtCheck);
 
 app.get('/risk-reviews/:userId', function(req, res) {
-  db.get().query(`SELECT 		ri.risk_identification_id riskIdentificationId
+  db.get().query(`SELECT 		    ri.risk_identification_id riskIdentificationId
+                                , ri.risk_identification_added_date riskIidentificationAddedDate
                                 , r.risk_id riskId
                                 , r.risk_title riskTitle
                                 , r.risk_cause riskCause
@@ -24,11 +25,14 @@ app.get('/risk-reviews/:userId', function(req, res) {
                                 , p.project_scope projectScope
                                 , a.activity_id activityId
                                 , a.activity_title activityTitle
+                                , a.activity_details activityDetails
                                 , u.user_id userId
                                 , u.user_name userName
+                                , rt.risk_type_name riskTypeName
                                 , rr.risk_review_added_date riskReviewAddedDate
                   FROM 		      risk_identifications ri
                   INNER JOIN	  risks r on r.risk_id = ri.risk_id
+                  INNER JOIN	  risk_types rt on rt.risk_type_id = r.risk_type_id
                   LEFT JOIN	    projects p on p.project_id = ri.project_id
                   LEFT JOIN	    activities a on a.activity_id = ri.activity_id
                   INNER JOIN	  users u on u.user_id = ri.user_id
