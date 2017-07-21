@@ -3,4 +3,4 @@ typings/
 .vscode/
 *.log
 *.log.*
-db.js
+db.*
