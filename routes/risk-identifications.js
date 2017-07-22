@@ -80,11 +80,12 @@ app.post('/risk-identifications', function(req, res) {
 
 app.delete('/risk-identifications/:riskIdentificationId', function(req, res) {  
   db.get().query('DELETE FROM risk_identifications WHERE risk_identification_id = ?', [req.params.riskIdentificationId], function(err, result){ 
-    if (err)
+    if (err) {
       return res.status(400).send({
         error: "Unable to remove risk identification", 
         details: err
       });
+    }
 
     res.status(200).send({
       success: "Risk identification removed successfully",
