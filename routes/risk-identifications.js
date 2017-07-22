@@ -11,7 +11,7 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
-app.use('/risk-identifications', jwtCheck);
+app.use('/risk-identifications/private', jwtCheck);
 
 app.get('/risk-identifications/projects/:userId/:riskId', function(req, res) {
   db.get().query(`SELECT 			p.project_id projectId
@@ -25,8 +25,10 @@ app.get('/risk-identifications/projects/:userId/:riskId', function(req, res) {
                   INNER JOIN	activities a ON p.project_id = a.project_id
                   WHERE			  a.user_id = ?
                   GROUP BY 		p.project_id`, [req.params.riskId, req.params.userId], function(err, rows, fields) {
-    if (err) 
-        return res.status(400).send({"error": true, "details": err});            
+    return res.status(400).send({
+      error: "Unable to fetch risk identifications", 
+      details: err
+    });
     
     res.status(200).send(rows);
   });
@@ -44,8 +46,10 @@ app.get('/risk-identifications/activities/:userId/:riskId', function(req, res) {
                   INNER JOIN	activities a ON p.project_id = a.project_id
                   WHERE			  a.user_id = ?
                   GROUP BY 		a.activity_id`, [req.params.riskId, req.params.userId], function(err, rows, fields) {
-    if (err) 
-        return res.status(400).send({"error": true, "details": err});            
+    return res.status(400).send({
+      error: "Unable to fetch risk identifications", 
+      details: err
+    });
     
     res.status(200).send(rows);
   });
@@ -61,19 +65,30 @@ app.post('/risk-identifications', function(req, res) {
   };
 
   db.get().query('INSERT INTO risk_identifications SET ?', [riskIdentification], function(err, result){ 
-    if (err) {
-      return res.status(400).send({"error": true, "details": err});
-    }
+    if (err)
+      return res.status(400).send({
+        error: "Unable to add risk identification", 
+        details: err
+      });
 
-    res.status(200).send(riskIdentification);
+    res.status(200).send({
+      success: "Risk identification added successfully",
+      result
+    });
   });
 });
 
 app.delete('/risk-identifications/:riskIdentificationId', function(req, res) {  
   db.get().query('DELETE FROM risk_identifications WHERE risk_identification_id = ?', [req.params.riskIdentificationId], function(err, result){ 
-    if (err) 
-        return res.status(400).send({"error": true, "details": err});
+    if (err)
+      return res.status(400).send({
+        error: "Unable to remove risk identification", 
+        details: err
+      });
 
-    res.status(200).send();
+    res.status(200).send({
+      success: "Risk identification removed successfully",
+      result
+    });
   });
 });
