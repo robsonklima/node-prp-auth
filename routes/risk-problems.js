@@ -11,7 +11,7 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
-app.use('/risk-problems', jwtCheck);
+app.use('/risk-problems/private', jwtCheck);
 
 app.get('/risk-problems/projects/:userId/:riskId', function(req, res) {
   db.get().query(`SELECT 			p.project_id projectId
@@ -74,19 +74,33 @@ app.post('/risk-problems', function(req, res) {
     risk_problem_added_date: new Date()
   };
 
-  db.get().query('INSERT INTO risk_problems SET ?', [riskProblem], function(err, result){ 
-    if (err) 
-        return res.status(400).send({"error": true, "details": err});
+  console.log(riskProblem)
 
-    res.status(200).send(riskProblem);
+  db.get().query('INSERT INTO risk_problems SET ?', [riskProblem], function(err, result){ 
+    if (err)
+      return res.status(400).send({
+        error: "Unable to add risk problem", 
+        details: err
+      });
+
+    res.status(200).send({
+      success: "Risk problem added successfully",
+      result
+    });
   });
 });
 
 app.delete('/risk-problems/:riskProblemId', function(req, res) {  
   db.get().query('DELETE FROM risk_problems WHERE risk_problem_id = ?', [req.params.riskProblemId], function(err, result){ 
-    if (err) 
-        return res.status(400).send({"error": true, "details": err});
+    if (err)
+      return res.status(400).send({
+        error: "Unable to remove risk problem", 
+        details: err
+      });
 
-    res.status(200).send();
+    res.status(200).send({
+      success: "Risk problem removed successfully",
+      result
+    });
   });
 });

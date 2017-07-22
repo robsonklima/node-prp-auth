@@ -47,6 +47,8 @@ app.get('/risks/project/:projectId', function (req, res) {
                               , (SELECT risk_identification_id FROM risk_identifications ri 
                                   WHERE r.risk_id = ri.risk_id
                                   AND ri.project_id = ?) as riskIdentificationId
+                              , (SELECT risk_problem_id FROM risk_problems rp
+			                            WHERE rp.risk_identification_id = riskIdentificationId) as riskProblemId
                    FROM 		  risks r
                    INNER JOIN	risk_types rt ON r.risk_type_id = rt.risk_type_id
                    INNER JOIN	risk_categories rc ON r.risk_category_id = rc.risk_category_id
@@ -71,6 +73,8 @@ app.get('/risks/activity/:activityId', function (req, res) {
                               , (SELECT risk_identification_id FROM risk_identifications ri 
                                   WHERE r.risk_id = ri.risk_id
                                   AND ri.activity_id = ?) as riskIdentificationId
+                              , (SELECT risk_problem_id FROM risk_problems rp
+			                            WHERE rp.risk_identification_id = riskIdentificationId) as riskProblemId
                    FROM 		  risks r
                    INNER JOIN	risk_types rt ON r.risk_type_id = rt.risk_type_id
                    INNER JOIN	risk_categories rc ON r.risk_category_id = rc.risk_category_id
