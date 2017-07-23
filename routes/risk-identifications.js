@@ -78,6 +78,26 @@ app.post('/risk-identifications', function(req, res) {
   });
 });
 
+app.put('/risk-identifications/:riskIdentificationId', function (req, res) {
+  riskIdentification = {
+    risk_identification_response: req.body.riskIdentificationResponse
+  };
+
+  db.get().query('UPDATE risk_identifications SET ? WHERE risk_identification_id = ?',
+    [riskIdentification, req.params.riskIdentificationId], function (err, result) {
+      if (err)
+        return res.status(400).send({
+          error: "Unable to update risk identification",
+          details: err
+        });
+
+      res.status(200).send({
+        success: "Risk identification updated successfully",
+        result
+      });
+    });
+});
+
 app.delete('/risk-identifications/:riskIdentificationId', function(req, res) {  
   db.get().query('DELETE FROM risk_identifications WHERE risk_identification_id = ?', [req.params.riskIdentificationId], function(err, result){ 
     if (err) {

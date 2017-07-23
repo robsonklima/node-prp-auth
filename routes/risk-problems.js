@@ -74,8 +74,6 @@ app.post('/risk-problems', function(req, res) {
     risk_problem_added_date: new Date()
   };
 
-  console.log(riskProblem)
-
   db.get().query('INSERT INTO risk_problems SET ?', [riskProblem], function(err, result){ 
     if (err)
       return res.status(400).send({

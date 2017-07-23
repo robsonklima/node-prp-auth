@@ -14,15 +14,26 @@ var jwtCheck = ejwt({
 app.use('/projects', jwtCheck);
 
 app.get('/projects', function (req, res) {
-  db.get().query(`SELECT 	    p.project_id projectId
-                              , p.project_name projectName
-                              , p.project_scope projectScope
-                              , p.project_added_date projectAddedDate
-                              , count(a.activity_id) projectAmountActivities
-                   FROM 		  projects p
-                   LEFT JOIN	activities a on p.project_id = a.project_id
-                   GROUP BY 	p.project_id
-                   ORDER BY 	p.project_name`, function (err, rows, fields) {
+  db.get().query(`SELECT 	      p.project_id projectId
+                                , p.project_name projectName
+                                , p.project_scope projectScope
+                                , p.project_added_date projectAddedDate
+                                , (SELECT count(*) 
+                                    FROM 	activities a 
+                                    WHERE 	p.project_id = a.project_id) projectAmountActivities
+                                , (SELECT count(*) 
+                                    FROM 	risk_identifications ri 
+                                    WHERE 	p.project_id = ri.project_id) projectAmountRiskIdentifications
+                                , (SELECT count(*) 
+                                    FROM 	risk_problems rp 
+                                    WHERE 	rp.risk_identification_id IN (
+                                      SELECT risk_identification_id 
+                                      FROM risk_identifications 
+                                      WHERE project_id = p.project_id)) projectAmountProblems
+                   FROM 		    projects p
+                   LEFT JOIN	  risk_identifications ri ON p.project_id = ri.project_id
+                   GROUP BY 	  p.project_id
+                   ORDER BY 	  p.project_name;`, function (err, rows, fields) {
       if (err)
         return res.status(400).send({ 
           error: "Unable to fetch projects", 
@@ -88,7 +99,7 @@ app.put('/projects/:projectId', function (req, res) {
 
       res.status(200).send({
         success: "Project updated successfully",
-        project
+        result
       });
     });
 });
