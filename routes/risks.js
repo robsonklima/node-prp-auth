@@ -53,7 +53,6 @@ app.get('/risks/project/:projectId', function (req, res) {
                    INNER JOIN	risk_categories rc ON r.risk_category_id = rc.risk_category_id
                    LEFT JOIN	  risk_identifications ri ON r.risk_id = ri.risk_id AND ri.project_id = ?
                    LEFT JOIN	  risk_problems rp ON ri.risk_identification_id = rp.risk_identification_id
-                   GROUP BY 	  r.risk_id
                    ORDER BY 	  r.risk_title;`, [req.params.projectId], function (err, rows, fields) {
       if (err)
         return res.status(400).send({ "error": true, "details": err });
@@ -81,7 +80,6 @@ app.get('/risks/activity/:activityId', function (req, res) {
                    INNER JOIN	risk_categories rc ON r.risk_category_id = rc.risk_category_id
                    LEFT JOIN	  risk_identifications ri ON r.risk_id = ri.risk_id AND ri.activity_id = ?
                    LEFT JOIN	  risk_problems rp ON ri.risk_identification_id = rp.risk_identification_id
-                   GROUP BY 	  r.risk_id
                    ORDER BY 	  r.risk_title;`, [req.params.activityId], function (err, rows, fields) {
       if (err)
         return res.status(400).send({ "error": true, "details": err });

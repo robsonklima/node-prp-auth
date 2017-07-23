@@ -88,6 +88,26 @@ app.post('/risk-problems', function(req, res) {
   });
 });
 
+app.put('/risk-problems/:riskProblemId', function (req, res) {
+  riskProblem = {
+    risk_problem_deal: req.body.riskProblemDeal
+  };
+
+  db.get().query('UPDATE risk_problems SET ? WHERE risk_problem_id = ?',
+    [riskProblem, req.params.riskProblemId], function (err, result) {
+      if (err)
+        return res.status(400).send({
+          error: "Unable to update risk problem",
+          details: err
+        });
+
+      res.status(200).send({
+        success: "Risk problem updated successfully",
+        result
+      });
+    });
+});
+
 app.delete('/risk-problems/:riskProblemId', function(req, res) {  
   db.get().query('DELETE FROM risk_problems WHERE risk_problem_id = ?', [req.params.riskProblemId], function(err, result){ 
     if (err)
