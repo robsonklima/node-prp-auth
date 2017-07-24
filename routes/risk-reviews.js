@@ -29,6 +29,12 @@ app.get('/risk-reviews/:userId', function(req, res) {
                                 , u.user_id userId
                                 , u.user_name userName
                                 , rt.risk_type_name riskTypeName
+                                , rr.risk_review_id riskReviewId
+                                , rr.risk_review_cost riskReviewCost
+                                , rr.risk_review_schedule riskReviewSchedule
+                                , rr.risk_review_scope riskReviewScope
+                                , rr.risk_review_quality riskReviewQuality
+                                , rr.risk_review_probability riskReviewProbability
                                 , rr.risk_review_added_date riskReviewAddedDate
                   FROM 		      risk_identifications ri
                   INNER JOIN	  risks r on r.risk_id = ri.risk_id
@@ -41,7 +47,7 @@ app.get('/risk-reviews/:userId', function(req, res) {
                   ORDER BY 	  	r.risk_title, p.project_name`, [req.params.userId], function(err, rows, fields) {
     if (err)
       return res.status(400).send({ 
-        error: "Unable to fetch projects", 
+        error: "Unable to fetch risk reviews", 
         details: err 
     });
 
@@ -63,8 +69,40 @@ app.post('/risk-reviews', function(req, res) {
 
   db.get().query('INSERT INTO risk_reviews SET ?', [riskReview], function(err, result){ 
     if (err)
-        return res.status(400).send({"error": true, "details": err});
+        return res.status(400).send({
+          error: "Unable to add risk review", 
+          details: err
+        });
 
-    res.status(200).send(riskReview);
+      res.status(200).send({
+        success: "Risk review added successfully",
+        result
+      });
   });
+});
+
+app.put('/risk-reviews/:riskReviewId', function (req, res) {
+  riskReview = {
+    risk_review_cost: req.body.riskReviewCost,
+    risk_review_schedule: req.body.riskReviewSchedule,
+    risk_review_scope: req.body.riskReviewScope,
+    risk_review_quality: req.body.riskReviewQuality,
+    risk_review_probability: req.body.riskReviewProbability,
+    risk_identification_id: req.body.riskIdentificationId,
+    user_id: req.body.userId
+  };
+
+  db.get().query('UPDATE risk_reviews SET ? WHERE risk_review_id = ?',
+    [riskReview, req.params.riskReviewId], function (err, result) {
+      if (err)
+        return res.status(400).send({
+          error: "Unable to update risk review",
+          details: err
+        });
+
+      res.status(200).send({
+        success: "Risk review updated successfully",
+        result
+      });
+    });
 });

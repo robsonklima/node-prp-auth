@@ -38,23 +38,32 @@ app.get('/activities', function (req, res) {
 });
 
 app.get('/activities/project/:projectId', function (req, res) {
-  db.get().query(`SELECT 	  
-                   a.activity_id activityId
-                   , a.activity_title activityTitle
-                   , a.activity_details activityDetails
-                   , a.activity_amount_hours activityAmountHours
-                   , a.activity_added_date activityAddedDate
-                   , a.project_id projectId
-                   , a.user_id userId
-                   , p.project_name projectName
-                   , u.user_name userName
-                   FROM 	activities a, projects p, users u
-                   WHERE 	a.project_id = p.project_id and a.user_id = u.user_id
-                   AND    a.project_id = ?
-                   ORDER BY a.activity_title`, [req.params.projectId], function (err, rows, fields) {
+  db.get().query(`SELECT 	    a.activity_id activityId
+                              , a.activity_title activityTitle
+                              , a.activity_details activityDetails
+                              , a.activity_amount_hours activityAmountHours
+                              , a.activity_added_date activityAddedDate
+                              , a.project_id projectId
+                              , a.user_id userId
+                              , p.project_name projectName
+                              , u.user_name userName
+                              , (SELECT  count(*) 
+                                FROM   risk_identifications ri
+                                WHERE  a.activity_id = ri.activity_id) activityAmountRiskIdentifications
+                              , (SELECT  count(*) 
+                                FROM   risk_problems rp 
+                                WHERE  rp.risk_identification_id IN (
+                                  SELECT risk_identification_id 
+                                  FROM   risk_identifications 
+                                  WHERE  activity_id = a.activity_id)) activityAmountProblems
+                   FROM 	    activities a, projects p, users u
+                   WHERE 	    a.project_id = p.project_id and a.user_id = u.user_id
+                   AND        a.project_id = ?
+                   ORDER BY   a.activity_title;`, 
+                   [req.params.projectId], function (err, rows, fields) {
       if (err)
         return res.status(400).send({
-          error: "Unable to fetch activity",
+          error: "Unable to fetch activities",
           details: err
         });
 
