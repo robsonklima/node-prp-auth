@@ -43,8 +43,8 @@ app.get('/risk-reviews/:userId', function(req, res) {
                   LEFT JOIN	    activities a on a.activity_id = ri.activity_id
                   INNER JOIN	  users u on u.user_id = ri.user_id
                   LEFT JOIN		  risk_reviews rr ON rr.risk_identification_id = ri.risk_identification_id
-                  WHERE		      u.user_id = ?
-                  ORDER BY 	  	r.risk_title, p.project_name`, [req.params.userId], function(err, rows, fields) {
+                  WHERE		      a.user_id = ?
+                  ORDER BY 	  	rr.risk_review_id desc, r.risk_title, p.project_name asc`, [req.params.userId], function(err, rows, fields) {
     if (err)
       return res.status(400).send({ 
         error: "Unable to fetch risk reviews", 
