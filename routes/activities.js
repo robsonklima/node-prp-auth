@@ -63,15 +63,17 @@ app.get('/activities/project/:projectId', function (req, res) {
 });
 
 app.get('/activities/:activityId', function (req, res) {
-  db.get().query(`SELECT 
-                    activity_id activityId
-                    , activity_title activityTitle
-                    , activity_details activityDetails
-                    , activity_amount_hours activityAmountHours
-                    , activity_added_date activityAddedDate
-                    , project_id projectId
-                    , user_id userId
-                   FROM activities WHERE activity_id = ?`,
+  db.get().query(`SELECT        a.activity_id activityId
+                                , a.activity_title activityTitle
+                                , a.activity_details activityDetails
+                                , a.activity_amount_hours activityAmountHours
+                                , a.activity_added_date activityAddedDate
+                                , a.project_id projectId
+                                , a.user_id userId
+                                , u.user_name userName
+                   FROM         activities a
+                   INNER JOIN   users u ON a.user_id = u.user_id
+                   WHERE        activity_id = ?;`,
     [req.params.activityId], function (err, rows, fields) {
       if (err)
         return res.status(400).send({
