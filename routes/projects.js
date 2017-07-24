@@ -58,7 +58,7 @@ app.get('/projects/:projectId', function (req, res) {
           details: err 
         });
 
-      res.status(200).send(rows);
+      res.status(200).send(rows[0]);
     });
 });
 
