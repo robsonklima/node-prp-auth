@@ -4,3 +4,4 @@ typings/
 *.log
 *.log.*
 db.*
+db.js

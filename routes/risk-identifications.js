@@ -13,43 +13,31 @@ var jwtCheck = ejwt({
 
 app.use('/risk-identifications/private', jwtCheck);
 
-app.get('/risk-identifications/projects/:userId/:riskId', function(req, res) {
-  db.get().query(`SELECT 			p.project_id projectId
+app.get('/risk-identifications/:riskId', function(req, res) {
+  db.get().query(`SELECT 		  ri.risk_identification_id riskIdentificationId
+                              , ri.risk_identification_response riskIdentificationResponse
+                              , ri.risk_identification_added_date riskIdentificationAddedDate
+                              , u.user_id
+			                        , u.user_name userName
+                              , p.project_id projectId
                               , p.project_name projectName
-                              , (SELECT  risk_identification_id
-                                  FROM   risk_identifications ri
-                                  WHERE  ri.project_id = p.project_id
-                                  AND    ri.risk_id = ?
-                                  LIMIT  1) riskIdentificationId
-                  FROM 			  projects p
-                  INNER JOIN	activities a ON p.project_id = a.project_id
-                  WHERE			  a.user_id = ?
-                  GROUP BY 		p.project_id`, [req.params.riskId, req.params.userId], function(err, rows, fields) {
-    return res.status(400).send({
-      error: "Unable to fetch risk identifications", 
-      details: err
-    });
-    
-    res.status(200).send(rows);
-  });
-});
-
-app.get('/risk-identifications/activities/:userId/:riskId', function(req, res) {
-  db.get().query(`SELECT 			a.activity_id activityId
+                              , a.activity_id activityId
                               , a.activity_title activityTitle
-                              , (SELECT  risk_identification_id
-                                  FROM   risk_identifications ri
-                                  WHERE  ri.activity_id = a.activity_id
-                                  AND    ri.risk_id = ?
-                                  LIMIT  1) riskIdentificationId
-                  FROM 			  projects p
-                  INNER JOIN	activities a ON p.project_id = a.project_id
-                  WHERE			  a.user_id = ?
-                  GROUP BY 		a.activity_id`, [req.params.riskId, req.params.userId], function(err, rows, fields) {
-    return res.status(400).send({
-      error: "Unable to fetch risk identifications", 
-      details: err
-    });
+                              , r.risk_id riskId
+                              , r.risk_title riskTitle
+                  FROM 		    risk_identifications ri
+                  INNER JOIN	risks r ON r.risk_id = ri.risk_id
+                  INNER JOIN	users u ON u.user_id = ri.user_id
+                  LEFT JOIN   projects p ON p.project_id = ri.project_id
+                  LEFT JOIN   activities a ON a.activity_id = ri.activity_id
+                  WHERE		    ri.risk_id = ?
+                  ORDER BY    ri.risk_identification_id DESC;`, [req.params.riskId], function(err, rows, fields) {
+    if (err) {
+      return res.status(400).send({
+        error: "Unable to fetch risk identifications", 
+        details: err
+      });
+    }
     
     res.status(200).send(rows);
   });
