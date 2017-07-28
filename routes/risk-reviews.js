@@ -66,7 +66,8 @@ app.get('/risk-reviews/user/:userId', function(req, res) {
 //                               , rr.risk_review_probability riskReviewProbability
 //                               , rr.risk_review_added_date riskReviewAddedDate
 //                    FROM       risk_reviews rr
-//                    WHERE      rr.risk_review_id = ?`,
+//                    WHERE      rr.risk_review_id = ?
+//                    LIMIT      1;`,
 //     [req.params.riskReviewId], function (err, rows, fields) {
 //       if (err)
 //         return res.status(400).send({ 
@@ -74,7 +75,7 @@ app.get('/risk-reviews/user/:userId', function(req, res) {
 //           details: err 
 //         });
 
-//       res.status(200).send(rows);
+//       res.status(200).send(rows[0]);
 //     });
 // });
 

@@ -13,7 +13,7 @@ var jwtCheck = ejwt({
 });
 
 function createToken(user) {
-  return jwt.sign(_.omit(user), config.secretKey, { expiresIn: 60 * 60 });
+  return jwt.sign(_.omit(user), config.secretKey, { expiresIn: 60*60*5 });
 }
 
 function login(userEmail, userPassword, done) {
