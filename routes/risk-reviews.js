@@ -55,29 +55,29 @@ app.get('/risk-reviews/user/:userId', function(req, res) {
     });
 });
 
-// app.get('/risk-reviews/:riskReviewId', function (req, res) {
-//   db.get().query(`SELECT      rr.risk_review_id riskReviewId
-//                               , rr.user_id userId
-//                               , rr.risk_identification_id riskIdentificationId
-//                               , rr.risk_review_cost riskReviewCost
-//                               , rr.risk_review_schedule riskReviewSchedule
-//                               , rr.risk_review_scope riskReviewScope
-//                               , rr.risk_review_quality riskReviewQuality
-//                               , rr.risk_review_probability riskReviewProbability
-//                               , rr.risk_review_added_date riskReviewAddedDate
-//                    FROM       risk_reviews rr
-//                    WHERE      rr.risk_review_id = ?
-//                    LIMIT      1;`,
-//     [req.params.riskReviewId], function (err, rows, fields) {
-//       if (err)
-//         return res.status(400).send({ 
-//           error: "Unable to fetch risk review", 
-//           details: err 
-//         });
+app.get('/risk-reviews/:riskReviewId', function (req, res) {
+  db.get().query(`SELECT      rr.risk_review_id riskReviewId
+                              , rr.user_id userId
+                              , rr.risk_identification_id riskIdentificationId
+                              , rr.risk_review_cost riskReviewCost
+                              , rr.risk_review_schedule riskReviewSchedule
+                              , rr.risk_review_scope riskReviewScope
+                              , rr.risk_review_quality riskReviewQuality
+                              , rr.risk_review_probability riskReviewProbability
+                              , rr.risk_review_added_date riskReviewAddedDate
+                   FROM       risk_reviews rr
+                   WHERE      rr.risk_review_id = ?
+                   LIMIT      1;`,
+    [req.params.riskReviewId], function (err, rows, fields) {
+      if (err)
+        return res.status(400).send({ 
+          error: "Unable to fetch risk review", 
+          details: err 
+        });
 
-//       res.status(200).send(rows[0]);
-//     });
-// });
+      res.status(200).send(rows[0]);
+    });
+});
 
 app.post('/risk-reviews', function(req, res) {  
   riskReview = {
