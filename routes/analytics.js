@@ -49,7 +49,7 @@ app.get('/analytics/projects', function(req, res) {
   db.get().query(`SELECT 		  p.project_name label
                               , count(r.risk_id) value
                    FROM		    risks r
-                   INNER JOIN	risk_identifications ri ON ri.risk_id = ri.risk_id
+                   INNER JOIN	risk_identifications ri ON ri.risk_id = r.risk_id
                    INNER JOIN	projects p ON ri.project_id = p.project_id
                    GROUP BY 	p.project_id;`, function(err, rows, fields) {
     if (err)
@@ -66,7 +66,7 @@ app.get('/analytics/activities', function(req, res) {
   db.get().query(`SELECT 		  a.activity_title label
                               , count(r.risk_id) value
                    FROM		    risks r
-                   INNER JOIN	risk_identifications ri ON ri.risk_id = ri.risk_id
+                   INNER JOIN	risk_identifications ri ON ri.risk_id = r.risk_id
                    INNER JOIN	activities a ON a.activity_id = ri.activity_id
                    GROUP BY 	a.activity_id;`, function(err, rows, fields) {
     if (err)
