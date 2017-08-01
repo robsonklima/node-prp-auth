@@ -13,6 +13,22 @@ var app = module.exports = express.Router();
 
 //app.use('/analytics/private', jwtCheck);
 
+app.get('/analytics/risk-types', function(req, res) {
+  db.get().query(`SELECT 		  SUBSTRING(rt.risk_type_name, 1, 12) label
+                              , count(r.risk_id) value
+                   FROM		    risks r
+                   INNER JOIN	risk_types rt ON r.risk_type_id = rt.risk_type_id
+                   GROUP BY 	rt.risk_type_id;`, function(err, rows, fields) {
+    if (err)
+        return res.status(400).send({ 
+          error: "Unable to fetch risk types analytics", 
+          details: err 
+      });
+
+    res.status(200).send(rows);
+  });
+});
+
 app.get('/analytics/risk-categories', function(req, res) {
   db.get().query(`SELECT 		SUBSTRING(rc.risk_category_name, 1, 12) label
                                 , count(r.risk_id) value
@@ -29,24 +45,9 @@ app.get('/analytics/risk-categories', function(req, res) {
   });
 });
 
-app.get('/analytics/risk-types', function(req, res) {
-  db.get().query(`SELECT 		  SUBSTRING(rt.risk_type_name, 1, 12)
-                              , count(r.risk_id)
-                   FROM		    risks r
-                   INNER JOIN	risk_types rt ON r.risk_type_id = rt.risk_type_id
-                   GROUP BY 	rt.risk_type_id;`, function(err, rows, fields) {
-    if (err)
-        return res.status(400).send({ 
-          error: "Unable to fetch risk types analytics", 
-          details: err 
-      });
-
-    res.status(200).send(rows);
-  });
-});
-
 app.get('/analytics/projects', function(req, res) {
-  db.get().query(`SELECT 		  p.project_name, count(r.risk_id)
+  db.get().query(`SELECT 		  p.project_name label
+                              , count(r.risk_id) value
                    FROM		    risks r
                    INNER JOIN	risk_identifications ri ON ri.risk_id = ri.risk_id
                    INNER JOIN	projects p ON ri.project_id = p.project_id
@@ -62,7 +63,8 @@ app.get('/analytics/projects', function(req, res) {
 });
 
 app.get('/analytics/activities', function(req, res) {
-  db.get().query(`SELECT 		  a.activity_title, count(r.risk_id)
+  db.get().query(`SELECT 		  a.activity_title label
+                              , count(r.risk_id) value
                    FROM		    risks r
                    INNER JOIN	risk_identifications ri ON ri.risk_id = ri.risk_id
                    INNER JOIN	activities a ON a.activity_id = ri.activity_id
