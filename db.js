@@ -10,9 +10,9 @@ switch(env) {
 
         var dbconfig = {
             connectionLimit : 100,
-            host     : 'localhost',
+            host     : '127.0.0.1',
             user     : 'root',
-            password : '',
+            password : 'Rkl@2015',
             database : 'prp',
             debug    :  false
         };

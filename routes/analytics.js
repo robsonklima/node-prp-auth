@@ -78,3 +78,50 @@ app.get('/analytics/activities', function(req, res) {
     res.status(200).send(rows);
   });
 });
+
+app.get('/analytics/risks-top-10', function (req, res) {
+  db.get().query(`SELECT 	riskId
+                          , riskTitle
+                          , projectName
+                          , activityTitle
+                          , riskReviewConsImpact
+                          , riskReviewProbability
+                          , riskReviewDegreeImpact
+                          , CASE 
+                              WHEN riskReviewConsImpact <= 30 THEN 'Low'    
+                              WHEN riskReviewConsImpact > 30 AND riskReviewConsImpact <= 70 THEN 'Medium' 
+                              WHEN riskReviewConsImpact > 70 THEN 'High'
+                            END AS riskReviewPriority
+                    FROM 
+                    (
+                      SELECT 	    r.risk_id riskId
+                                  , r.risk_title riskTitle
+                                  , p.project_name projectName
+                                  , a.activity_title activityTitle
+                                  , ROUND(GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule) 
+                                      , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality),2)
+                                    ) riskReviewConsImpact
+                                  , ROUND(AVG(rr.risk_review_probability), 2) riskReviewProbability
+                                  , ROUND((GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
+                                    , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
+                                    AVG(rr.risk_review_probability)) / 100, 2
+                                  ) riskReviewDegreeImpact
+                      FROM 		    risk_reviews rr
+                      INNER JOIN	risk_identifications ri 
+                        ON        rr.risk_identification_id = ri.risk_identification_id
+                      INNER JOIN	risks r on r.risk_id = ri.risk_id
+                      LEFT JOIN	  projects p ON p.project_id = ri.project_id
+                      LEFT JOIN	  activities a ON a.activity_id = ri.activity_id
+                      Group by	  ri.risk_id, p.project_name, a.activity_title
+                      Order By	  riskReviewDegreeImpact DESC
+                      LIMIT       10
+                    ) as data;`, function (err, rows, fields) {
+      if (err)
+        return res.status(400).send({ 
+          error: "Unable to fetch top 10 risks", 
+          details: err 
+      });
+
+      res.status(200).send(rows);
+    });
+});

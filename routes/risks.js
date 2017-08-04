@@ -28,7 +28,10 @@ app.get('/risks', function (req, res) {
                    AND	    r.risk_category_id = rc.risk_category_id
                    ORDER BY r.risk_title`, function (err, rows, fields) {
       if (err)
-        return res.status(400).send({ "error": true, "details": err });
+        return res.status(400).send({ 
+          error: "Unable to fetch risks", 
+          details: err 
+      });
 
       res.status(200).send(rows);
     });
@@ -55,7 +58,10 @@ app.get('/risks/project/:projectId', function (req, res) {
                    LEFT JOIN	  risk_problems rp ON ri.risk_identification_id = rp.risk_identification_id
                    ORDER BY 	  r.risk_title;`, [req.params.projectId], function (err, rows, fields) {
       if (err)
-        return res.status(400).send({ "error": true, "details": err });
+        return res.status(400).send({ 
+          error: "Unable to fetch project risks", 
+          details: err 
+      });
 
       res.status(200).send(rows);
     });
@@ -82,7 +88,10 @@ app.get('/risks/activity/:activityId', function (req, res) {
                    LEFT JOIN	  risk_problems rp ON ri.risk_identification_id = rp.risk_identification_id
                    ORDER BY 	  r.risk_title;`, [req.params.activityId], function (err, rows, fields) {
       if (err)
-        return res.status(400).send({ "error": true, "details": err });
+        return res.status(400).send({ 
+          error: "Unable to fetch activities risks", 
+          details: err 
+      });
 
       res.status(200).send(rows);
     });
@@ -99,7 +108,10 @@ app.get('/risks/:riskId', function (req, res) {
                    FROM     risks
                    WHERE    risk_id = ?`, [req.params.riskId], function (err, rows, fields) {
       if (err)
-        return res.status(400).send({ "error": true, "details": err });
+        return res.status(400).send({ 
+          error: "Unable to fetch risk", 
+          details: err 
+      });
 
       res.status(200).send(rows);
     });
