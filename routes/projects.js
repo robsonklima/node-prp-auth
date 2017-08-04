@@ -104,7 +104,7 @@ app.get('/projects/expected-values/:projectId', function (req, res) {
                                     , AVG(rr.risk_review_probability) riskReviewProbability
                                     , COUNT(distinct rr.risk_review_id) as amountReviews
                                     , COUNT(distinct r.risk_id) as amountRisks
-                                    , (select 			ROUND(SUM(r.role_hour_charge * a.activity_amount_hours), 2) as valor_base
+                                    , (select 			ROUND(SUM(r.role_hour_charge * a.activity_amount_hours), 2) as baseValue
                                         from 			  projects p
                                         LEFT JOIN 	activities a on p.project_id = a.project_id
                                         LEFT JOIN	  users u ON u.user_id = a.user_id
@@ -120,7 +120,7 @@ app.get('/projects/expected-values/:projectId', function (req, res) {
                         WHERE 		  ri.project_id = ?
                         GROUP BY	  ri.risk_identification_id
                       ) as data1
-                    ) as data2`, [req.params.projectId, req.params.projectId], function (err, rows, fields) {
+                    ) as data2;`, [req.params.projectId, req.params.projectId], function (err, rows, fields) {
       if (err)
         return res.status(400).send({ 
           error: "Unable to fetch project", 
