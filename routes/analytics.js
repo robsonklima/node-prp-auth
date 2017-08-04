@@ -85,7 +85,7 @@ app.get('/analytics/risks-top-10', function (req, res) {
                           , projectName
                           , activityTitle
                           , riskReviewConsImpact
-                          , riskReviewProbability
+                          , CONCAT(riskReviewProbability, '%') riskReviewProbability
                           , riskReviewDegreeImpact
                           , CASE 
                               WHEN riskReviewConsImpact <= 30 THEN 'Low'    
@@ -101,7 +101,7 @@ app.get('/analytics/risks-top-10', function (req, res) {
                                   , ROUND(GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule) 
                                       , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality),2)
                                     ) riskReviewConsImpact
-                                  , ROUND(AVG(rr.risk_review_probability), 2) riskReviewProbability
+                                  , ROUND(AVG(rr.risk_review_probability), 0) riskReviewProbability
                                   , ROUND((GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
                                     , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
                                     AVG(rr.risk_review_probability)) / 100, 2
