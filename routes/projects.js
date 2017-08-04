@@ -11,29 +11,40 @@ var jwtCheck = ejwt({
   secret: config.secretKey
 });
 
-app.use('/projects', jwtCheck);
+// app.use('/projects', jwtCheck);
 
 app.get('/projects', function (req, res) {
-  db.get().query(`SELECT 	      p.project_id projectId
-                                , p.project_name projectName
-                                , p.project_scope projectScope
-                                , p.project_added_date projectAddedDate
-                                , (SELECT count(*) 
-                                    FROM 	activities a 
-                                    WHERE 	p.project_id = a.project_id) projectAmountActivities
-                                , (SELECT count(*) 
-                                    FROM 	risk_identifications ri 
-                                    WHERE 	p.project_id = ri.project_id) projectAmountRiskIdentifications
-                                , (SELECT count(*) 
-                                    FROM 	risk_problems rp 
-                                    WHERE 	rp.risk_identification_id IN (
-                                      SELECT risk_identification_id 
-                                      FROM risk_identifications 
-                                      WHERE project_id = p.project_id)) projectAmountProblems
-                   FROM 		    projects p
-                   LEFT JOIN	  risk_identifications ri ON p.project_id = ri.project_id
-                   GROUP BY 	  p.project_id
-                   ORDER BY 	  p.project_name;`, function (err, rows, fields) {
+  db.get().query(`SELECT 	    p.project_id projectId
+                              , p.project_name projectName
+                              , p.project_scope projectScope
+                              , p.project_added_date projectAddedDate
+                              , (SELECT count(*)
+                                  FROM 	activities a
+                                  WHERE p.project_id = a.project_id) projectAmountActivities
+                              , (SELECT count(*)
+                                  FROM 	risk_identifications ri
+                                  WHERE p.project_id = ri.project_id) projectAmountRiskIdentifications
+                              , (SELECT count(*)
+                                  FROM 	risk_problems rp
+                                  WHERE 	rp.risk_identification_id IN (
+                                    SELECT risk_identification_id 
+                                    FROM risk_identifications 
+                                    WHERE project_id = p.project_id)) projectAmountProblems
+                              , SUM(a.activity_amount_hours) projectAmountHours
+                              , (SELECT 			ROUND(SUM(r.role_hour_charge * a.activity_amount_hours), 2)
+                                  FROM 			  projects p_aux
+                                  LEFT JOIN 	activities a ON p_aux.project_id = a.project_id
+                                  LEFT JOIN	  users u ON u.user_id = a.user_id
+                                  LEFT JOIN	  roles r ON u.role_id = r.role_id
+                                  WHERE 			p_aux.project_id = p.project_id
+                                  GROUP BY 		p_aux.project_id ) projectValue
+                    FROM 		    projects p
+                    LEFT JOIN	  risk_identifications ri ON p.project_id = ri.project_id
+                    LEFT JOIN	  activities a ON p.project_id = a.project_id
+                    LEFT JOIN	  users u ON u.user_id = a.user_id
+                    LEFT JOIN	  roles r ON u.role_id = r.role_id
+                    GROUP BY 	  p.project_id
+                    ORDER BY 	  p.project_name;`, function (err, rows, fields) {
       if (err)
         return res.status(400).send({ 
           error: "Unable to fetch projects", 
@@ -52,6 +63,64 @@ app.get('/projects/:projectId', function (req, res) {
                    FROM       projects 
                    WHERE      project_id = ?`,
     [req.params.projectId], function (err, rows, fields) {
+      if (err)
+        return res.status(400).send({ 
+          error: "Unable to fetch project", 
+          details: err 
+        });
+
+      res.status(200).send(rows[0]);
+    });
+});
+
+app.get('/projects/expected-values/:projectId', function (req, res) {
+  db.get().query(`SELECT 	
+                        (SUM(projectValue)/SUM(amountRisks)) 
+                          - SUM(opportunityImpactValue) bestCase
+                        , SUM(projectValue)/SUM(amountRisks) baseValue
+                        , (SUM(projectValue)/SUM(amountRisks)) 
+                          + SUM(threatExpectedValue) - SUM(opportunityImpactValue) expectedValue
+                        , (SUM(projectValue)/SUM(amountRisks)) 
+                          + SUM(threatImpactValue) worstCase
+                    FROM 
+                    (
+                      SELECT 			
+                            riskTypeName
+                            , amountReviews
+                            , amountRisks
+                            , projectValue
+                            , (projectValue * riskReviewCost) as projectImpact
+                            , CASE WHEN riskTypeName = 'Threat' THEN ((riskReviewProbability / 100) 
+                              * (projectValue * (riskReviewCost / 100))) ELSE 0 END as threatExpectedValue
+                            , CASE WHEN riskTypeName = 'Threat' THEN (projectValue * (riskReviewCost / 100)) ELSE 0 END as threatImpactValue
+                            , CASE WHEN riskTypeName = 'Opportunity' THEN ((riskReviewProbability / 100) 
+                              * (projectValue * (riskReviewCost / 100))) ELSE 0 END as opportunityExpectedValue
+                            , CASE WHEN riskTypeName = 'Opportunity' THEN (projectValue * (riskReviewCost / 100)) ELSE 0 END as opportunityImpactValue
+                      FROM
+                      (
+                        SELECT 
+                                    rt.risk_type_name riskTypeName
+                                    , AVG(rr.risk_review_cost) riskReviewCost
+                                    , AVG(rr.risk_review_probability) riskReviewProbability
+                                    , COUNT(distinct rr.risk_review_id) as amountReviews
+                                    , COUNT(distinct r.risk_id) as amountRisks
+                                    , (select 			ROUND(SUM(r.role_hour_charge * a.activity_amount_hours), 2) as valor_base
+                                        from 			  projects p
+                                        LEFT JOIN 	activities a on p.project_id = a.project_id
+                                        LEFT JOIN	  users u ON u.user_id = a.user_id
+                                        LEFT JOIN	  roles r ON u.role_id = r.role_id
+                                        WHERE 			p.project_id = ?
+                                        GROUP BY 		p.project_id ) as projectValue
+                        FROM 		    risk_reviews rr
+                        INNER JOIN	risk_identifications ri on rr.risk_identification_id = ri.risk_identification_id
+                        INNER JOIN	risks r on ri.risk_id = r.risk_id
+                        INNER JOIN	risk_types rt on r.risk_type_id = rt.risk_type_id
+                        INNER join	risk_categories rc on rc.risk_category_id = r.risk_category_id
+                        LEFT JOIN	  projects p on p.project_id = ri.project_id
+                        WHERE 		  ri.project_id = ?
+                        GROUP BY	  ri.risk_identification_id
+                      ) as data1
+                    ) as data2`, [req.params.projectId, req.params.projectId], function (err, rows, fields) {
       if (err)
         return res.status(400).send({ 
           error: "Unable to fetch project", 
