@@ -73,6 +73,83 @@ app.get('/projects/:projectId', function (req, res) {
     });
 });
 
+app.get('/projects/reviewed-risks/:projectId', function (req, res) {
+  db.get().query(`select	riskId
+                         , riskTitle
+                         , riskTypeName
+                         , riskCategoryName
+                         , riskReviewCost * 100 riskReviewCost
+                         , riskReviewSchedule * 100 riskReviewSchedule
+                         , riskReviewScope * 100 riskReviewScope
+                         , riskReviewQuality * 100 riskReviewQuality
+                         , riskReviewProbability * 100 riskReviewProbability
+                         , consolidatedImpact
+                         , qualificationDegree
+                         , riskReviewPriority
+                         , riskReviewAmount
+                         , projectValue
+                         , ROUND(projectValue * riskReviewCost, 2) projectImpact
+                         , ROUND(riskReviewProbability * (projectValue * riskReviewCost), 2) expectedValue
+                    FROM
+                    (
+                        SELECT      r.risk_id riskId
+                                    , r.risk_title riskTitle
+                                    , rt.risk_type_name riskTypeName
+                                    , rc.risk_category_name riskCategoryName
+                                    , AVG(rr.risk_review_cost) / 100 riskReviewCost
+                                    , AVG(rr.risk_review_schedule) / 100 riskReviewSchedule
+                                    , AVG(rr.risk_review_scope) / 100 riskReviewScope
+                                    , AVG(rr.risk_review_quality) / 100 riskReviewQuality
+                                    , AVG(rr.risk_review_probability) / 100 riskReviewProbability
+                                    , GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
+                                      , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) consolidatedImpact
+                                    , GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
+                                      , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
+                                        AVG(rr.risk_review_probability) as qualificationDegree
+                                    , CASE 
+                                      WHEN ((GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
+                                        , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
+                                          AVG(rr.risk_review_probability)) / 10) <= 30  
+                                      THEN 'Low'    
+                                      WHEN (((GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
+                                        , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
+                                          AVG(rr.risk_review_probability)) / 10) > 30
+                                        AND (GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
+                                        , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
+                                          AVG(rr.risk_review_probability)) / 10) <= 70
+                                      THEN 'Medium'
+                                      WHEN ((GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
+                                        , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
+                                          AVG(rr.risk_review_probability)) / 10) > 70 
+                                      THEN 'High'
+                                    END riskReviewPriority
+                                    , COUNT(ri.risk_identification_id) riskReviewAmount
+                                    , (SELECT 		SUM(r.role_hour_charge * a.activity_amount_hours) baseValue
+                                        FROM 		  projects p
+                                        LEFT JOIN activities a ON p.project_id = a.project_id
+                                        LEFT JOIN	users u ON u.user_id = a.user_id
+                                        LEFT JOIN	roles r ON u.role_id = r.role_id
+                                        WHERE 		p.project_id = ?
+                                        GROUP BY 	p.project_id ) projectValue
+                        FROM 			  risk_reviews rr
+                        INNER JOIN	risk_identifications ri ON ri.risk_identification_id = rr.risk_identification_id
+                        INNER JOIN	projects p ON ri.project_id = p.project_id
+                        INNER JOIN	risks r ON r.risk_id = ri.risk_id
+                        INNER JOIN	risk_types rt ON r.risk_type_id = rt.risk_type_id
+                        INNER JOIN	risk_categories rc ON r.risk_category_id = rc.risk_category_id
+                        WHERE 			ri.project_id = ?
+                        GROUP BY		r.risk_id) as data;`,
+    [req.params.projectId, req.params.projectId], function (err, rows, fields) {
+      if (err)
+        return res.status(400).send({ 
+          error: "Unable to fetch risks of this project", 
+          details: err 
+        });
+
+      res.status(200).send(rows);
+    });
+});
+
 app.get('/projects/expected-values/:projectId', function (req, res) {
   db.get().query(`SELECT 	
                         (SUM(projectValue)/SUM(amountRisks)) 
@@ -104,8 +181,8 @@ app.get('/projects/expected-values/:projectId', function (req, res) {
                                     , AVG(rr.risk_review_probability) riskReviewProbability
                                     , COUNT(distinct rr.risk_review_id) as amountReviews
                                     , COUNT(distinct r.risk_id) as amountRisks
-                                    , (select 			ROUND(SUM(r.role_hour_charge * a.activity_amount_hours), 2) as baseValue
-                                        from 			  projects p
+                                    , (SELECT 			ROUND(SUM(r.role_hour_charge * a.activity_amount_hours), 2) as baseValue
+                                        FROM 			  projects p
                                         LEFT JOIN 	activities a on p.project_id = a.project_id
                                         LEFT JOIN	  users u ON u.user_id = a.user_id
                                         LEFT JOIN	  roles r ON u.role_id = r.role_id
