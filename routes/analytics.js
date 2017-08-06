@@ -113,7 +113,7 @@ app.get('/analytics/risks-top-10', function (req, res) {
                       LEFT JOIN	  projects p ON p.project_id = ri.project_id
                       LEFT JOIN	  activities a ON a.activity_id = ri.activity_id
                       Group by	  ri.risk_id, p.project_name, a.activity_title
-                      Order By	  riskReviewDegreeImpact DESC
+                      Order By	  riskReviewConsImpact DESC
                       LIMIT       10
                     ) as data;`, function (err, rows, fields) {
       if (err)
