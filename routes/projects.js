@@ -95,9 +95,9 @@ app.get('/projects/reviewed-risks/:projectId', function (req, res) {
                               WHEN (consolidatedImpact) > 70 
                               THEN 'High'
                             END riskReviewPriority
-                          , ROUND((projectValue * riskReviewCost)/100, 2) projectImpact
                           , ROUND((riskReviewProbability/100) * 
                             (projectValue * (riskReviewCost/100)), 2) expectedValue
+                          , ROUND((projectValue * riskReviewCost)/100, 2) impactValue
                       FROM
                       (
                         SELECT      r.risk_id riskId
@@ -147,7 +147,7 @@ app.get('/projects/expected-values/:projectId', function (req, res) {
                           - SUM(opportunityImpactValue) bestCase
                         , SUM(projectValue)/SUM(amountRisks) baseValue
                         , (SUM(projectValue)/SUM(amountRisks)) 
-                          + SUM(threatExpectedValue) - SUM(opportunityImpactValue) expectedValue
+                          + SUM(threatExpectedValue) - SUM(opportunityExpectedValue) expectedValue
                         , (SUM(projectValue)/SUM(amountRisks)) 
                           + SUM(threatImpactValue) worstCase
                     FROM 

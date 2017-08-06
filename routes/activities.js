@@ -97,7 +97,7 @@ app.get('/activities/:activityId', function (req, res) {
 app.get('/activities/expected-values/:activityId', function (req, res) {
   db.get().query(`SELECT (SUM(activityValue)/SUM(amountRisks)) - SUM(opportunityImpactValue) bestCase
                          , (SUM(activityValue)/SUM(amountRisks)) baseValue
-                         , (SUM(activityValue)/SUM(amountRisks)) + SUM(threatExpectedValue) - SUM(opportunityImpactValue) expectedValue
+                         , (SUM(activityValue)/SUM(amountRisks)) + SUM(threatExpectedValue) - SUM(opportunityExpectedValue) expectedValue
                          , (SUM(activityValue)/SUM(amountRisks)) + SUM(threatImpactValue) worstCase
                     FROM 
                     (
