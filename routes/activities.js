@@ -199,7 +199,7 @@ app.get('/activities/expected-values/:activityId', function (req, res) {
                         WHERE 		  ri.activity_id = ?
                         GROUP BY	  ri.risk_identification_id
                       ) as data1
-                    ) as data2`, 
+                    ) as data2;`, 
                     [req.params.activityId, req.params.activityId], function (err, rows, fields) {
       if (err)
         return res.status(400).send({ 
