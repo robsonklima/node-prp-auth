@@ -130,3 +130,18 @@ app.put('/risk-reviews/:riskReviewId', function (req, res) {
       });
     });
 });
+
+app.delete('/risk-reviews/:riskReviewId', function (req, res) {
+  db.get().query('DELETE FROM risk_reviews WHERE risk_review_id = ?',
+    [req.params.riskReviewId], function (err, result) {
+      if (err)
+        return res.status(400).send({
+          error: "Unable to remove risk review",
+          details: err
+        });
+
+      res.status(200).send({
+        success: "Risk review removed successfully"
+      });
+    });
+});
