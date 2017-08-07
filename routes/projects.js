@@ -113,7 +113,7 @@ app.get('/projects/reviewed-risks/:projectId', function (req, res) {
                                       , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) consolidatedImpact
                                     , GREATEST(AVG(rr.risk_review_cost), AVG(rr.risk_review_schedule)
                                       , AVG(rr.risk_review_scope), AVG(rr.risk_review_quality)) * 
-                                      AVG(rr.risk_review_probability) as qualificationDegree
+                                      AVG(rr.risk_review_probability/100) as qualificationDegree
                                     , COUNT(ri.risk_identification_id) riskReviewAmount
                                     , (SELECT 		SUM(r.role_hour_charge * a.activity_amount_hours) baseValue
                                         FROM 		  projects p
